@@ -1,0 +1,58 @@
+-- [[ AJUSTE FINO DE 10 GRAUS PARA O TRONCO ]]
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+
+local armMeshId = "rbxassetid://8835551103"
+
+local function limpar()
+    for _, v in pairs(char:GetChildren()) do
+        if v.Name == "BracoCustom" then v:Destroy() end
+    end
+end
+
+local function criarBraco(ladoNome, ladoX)
+    local original = char:FindFirstChild(ladoNome .. "Arm") or char:FindFirstChild(ladoNome .. " Arm")
+    if not original then return end
+    original.Transparency = 1 
+
+    local p = Instance.new("Part", char)
+    p.Name = "BracoCustom"
+    p.CanCollide = false
+    p.Massless = true
+    p.Size = Vector3.new(1, 2, 1)
+    p.Color = char:WaitForChild("Head").Color
+    p.Material = Enum.Material.SmoothPlastic
+
+    local m = Instance.new("SpecialMesh", p)
+    m.MeshId = armMeshId
+    m.Scale = Vector3.new(1.05, 1.05, 1.05)
+    m.VertexColor = Vector3.new(1, 1, 1) 
+
+    local motor = Instance.new("Motor6D", p)
+    motor.Part0 = original
+    motor.Part1 = p
+
+    -- [[ O PULO DO GATO: AJUSTE DE 10 GRAUS ]]
+    -- Ajustamos a base e aplicamos os 10 graus que você pediu para alinhar com o corpo
+    local baseRot = math.rad(-90) 
+    local ajusteFino = math.rad(90 * ladoX) -- Inverte a direção dependendo do braço
+    
+    local pos = CFrame.new(ladoX * 0.02, 0, 0)
+    motor.C0 = pos * CFrame.Angles(0, baseRot + ajusteFino, 0)
+
+    local function atualizar()
+        local shirt = char:FindFirstChildOfClass("Shirt")
+        if shirt then m.TextureId = shirt.ShirtTemplate end
+        p.Color = char.Head.Color
+    end
+    
+    atualizar()
+    task.delay(1, atualizar)
+end
+
+limpar()
+criarBraco("Left", 1)
+criarBraco("Right", -1)
+
+print("Ajuste fino de 10 graus aplicado! Veja se alinhou agora, Rei amiga.")
+
